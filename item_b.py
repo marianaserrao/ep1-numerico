@@ -5,7 +5,7 @@ from utils import *
 # definindo valores do item
 n = 5
 m=2
-case=3
+case=int(input("Qual dos casos do enunciado será testado (1, 2 ou 3, respectivamente)?"))
 
 #definindo se ocorre deslocamento
 hasShift = True
