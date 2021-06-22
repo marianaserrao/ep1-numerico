@@ -39,7 +39,7 @@ def get_q(c, s, k, m):
     q[k+1,k]=s
     return q 
 
-#obtendo decomposicao QR
+# obtendo decomposicao QR
 def get_qr_decomposition(A):
     k=0
     R=A
@@ -75,9 +75,8 @@ def qr_shifted(A, hasShift, err=err):
             A_[0:m,0:m]-=uI
             Q,R = get_qr_decomposition(A_[0:m,0:m])
             A_[0:m,0:m]=R@Q+uI
-            V[0:m,0:m]=V[0:m,0:m]@Q
+            V[:,0:m]=V[:,0:m]@Q
             k+=1
-
         m-=1
 
     eigenvalues = np.diag(A_)
@@ -106,18 +105,31 @@ def get_A(n , m, item):
     return A/m
 
 # obtendo graficos
-def get_plot(case, X_0, frequencies):
+def get_plot(case, X_0, frequencies, eigenvectors):
 
-    A=X_0['case'+str(case)]
-    x = np.arange(0, 60, 0.001)
+    X_0=X_0['case'+str(case)]
+    A=(eigenvectors.T)@X_0
+
+    t = np.linspace(0 , 1, 360)
+    X_t=np.zeros([len(X_0),len(t)])
+
+    for (i,j) , x in np.ndenumerate(X_t):
+        X_t[i,j]=A[i]*np.cos(frequencies[i]*t[j])
+
+    print(X_t)
+    Y_t=eigenvectors@X_t
 
     fig, ax = plt.subplots(figsize=(12, 10))
-    c = plt.cm.get_cmap('hsv', len(A)+1)
+    c = plt.cm.get_cmap('hsv', len(X_0)+1)
 
-    for i in range(len(A)):
-        a=A[i]
+    for i in range(len(X_0)):
         label='Mola '+str(i+1)
-        ax.plot(a*(np.cos(frequencies[i]*x)), color=c(i), label=label)
+        ax.plot(t,X_t[i], color=c(i), label=label)
 
     ax.legend()
+    plt.figure
+    plt.title('Deslocamento das Molas')
+    plt.xlabel('Tempo (s)')
+    plt.ylabel('Deslocamento (m)')
+    plt.grid(True)
     plt.show()

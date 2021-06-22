@@ -13,7 +13,7 @@ for i in range(0,n):
         A[i,i+1]=-1
 
 #definindo se ocorre deslocamento
-hasShift = True
+hasShift = int(input('Haverá deslocamento no algoritmo (0 para não e 1 para sim)?'))
 
 eigenvalues, eigenvectors, iterations = qr_shifted(A, hasShift)
 
@@ -35,6 +35,7 @@ for i in range (1, n+1):
     for j in range (1, n+1):
         v=math.sin(i*j*math.pi/(n+1))
         vet.append(v)
+    vet = vet/np.linalg.norm(vet)
     vets.append(vet)
 print('GABARITO:\n')
 print('autovalores')

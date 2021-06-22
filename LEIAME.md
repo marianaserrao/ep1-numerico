@@ -1,6 +1,6 @@
 # numerico_ep1
  - Mariana Serrão Guilherme (11374850)
- - Beatriz Brito Segatti ()
+ - Beatriz Brito Segatti (11374930)
 
 ## Arquivos
 
