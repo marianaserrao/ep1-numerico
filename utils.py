@@ -105,30 +105,43 @@ def get_A(n , m, item):
     return A/m
 
 # obtendo graficos
-def get_plot(case, X_0, frequencies, eigenvectors):
+def get_plot(case, X_0, frequencies, eigenvectors, mass=0):
 
     X_0=X_0['case'+str(case)]
+
+    # array contendo os coeficientes "a" de cada mola (Coversao X(t)->Y(t): Y(t)=Q.T*X(t))
     A=(eigenvectors.T)@X_0
 
-    t = np.linspace(0 , 1, 360)
-    X_t=np.zeros([len(X_0),len(t)])
+    # valores de tempo
+    t = np.arange(0 , 60, 0.01)
 
-    for (i,j) , x in np.ndenumerate(X_t):
-        X_t[i,j]=A[i]*np.cos(frequencies[i]*t[j])
+    # matriz que conterá as posicoes (coluna: tempo, linha: mola)
+    Y_t=np.zeros([len(X_0),len(t)])
 
-    print(X_t)
-    Y_t=eigenvectors@X_t
+    #preenchendo a matriz X_t de acordo com a solucao geral (velocidade inicial = 0 -> coeficiente 'b' = 0)
+    for (i,j) , x in np.ndenumerate(Y_t):
+        Y_t[i,j]=A[i]*np.cos(frequencies[i]*t[j])
 
-    fig, ax = plt.subplots(figsize=(12, 10))
+    #coversao Y(t)->X(t): X(t)=Q*Y(t)
+    X_t=eigenvectors@Y_t
+
+    #criando grafico
+    fig, ax = plt.subplots()
+
+    #gerando escala de cores para o grafico
     c = plt.cm.get_cmap('hsv', len(X_0)+1)
 
-    for i in range(len(X_0)):
-        label='Mola '+str(i+1)
-        ax.plot(t,X_t[i], color=c(i), label=label)
+    #se o parametro mass for passado apenas o deslocamento da massa escolhida aparecera no grafico
+    if mass:
+        ax.plot(t, X_t[mass-1])
+        plt.title('Deslocamento das Massa ' + str(mass))
+    else:
+        for i in range(len(X_0)):
+            label='Massa '+str(i+1)
+            ax.plot(t,X_t[i], color=c(i), label=label)
+            ax.legend()
+            plt.title('Deslocamento das Massas')
 
-    ax.legend()
-    plt.figure
-    plt.title('Deslocamento das Molas')
     plt.xlabel('Tempo (s)')
     plt.ylabel('Deslocamento (m)')
     plt.grid(True)
