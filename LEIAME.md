@@ -31,11 +31,11 @@ Cada item apresenta os outputs abaixo:
 
 - item a:
 
-    - Número de iterações para a solução
+    - Número de iterações para a solução com e sem deslocamento
     - Auto-valores e auto-vetores encontrados pelo algoritmo
     - Auto-valores e auto-vetores (normalizados) encontrados pela fórmula analítica (gabarito)
 
 - itens b e c:
 
     - Frequências e modos de vibração de cada massa
-    - Gráfico do deslocamento de cada massa ou de uma massa específica
+    - Gráfico do deslocamento das massas ou de uma massa específica

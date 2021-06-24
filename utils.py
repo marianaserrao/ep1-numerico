@@ -11,11 +11,9 @@ X_0 = {
 }
 
 #print colored items in array (0 for pink, 1 for green)
-def show(items, color=2):
+def show(items):
     for index,value in enumerate(items):
-        # c = ['95m','32m','0m']
-        print("%s: %s" %(index+1,np.round_(value, 3)))
-    print()
+        print("%s: %s\n" %(index+1,np.round_(value, 3)))
 
 #obtendo valores do seno e cosseno para a rotacao de givens
 def get_givens_params(A, k):
@@ -42,7 +40,7 @@ def get_q(c, s, k, m):
 # obtendo decomposicao QR
 def get_qr_decomposition(A):
     k=0
-    R=A
+    R=A.copy()
     m=np.size(A,0)
     Q = np.identity(m)
     while k<=m-2:
@@ -57,7 +55,7 @@ def get_qr_decomposition(A):
 def qr_shifted(A, hasShift, err=err):
     m = n = np.size(A,0)
     V=np.identity(n)
-    A_=A
+    A_=A.copy()
     u=0
     k=0
     
@@ -78,7 +76,6 @@ def qr_shifted(A, hasShift, err=err):
             V[:,0:m]=V[:,0:m]@Q
             k+=1
         m-=1
-
     eigenvalues = np.diag(A_)
     eigenvectors = V.T
     iterations = k
@@ -107,23 +104,24 @@ def get_A(n , m, item):
 # obtendo graficos
 def get_plot(case, X_0, frequencies, eigenvectors, mass=0):
 
-    X_0=X_0['case'+str(case)]
+    #selecionando caso desejado do dicionario X_0
+    X_0=X_0['case'+str(case)].copy()
 
-    # array contendo os coeficientes "a" de cada mola (Coversao X(t)->Y(t): Y(t)=Q.T*X(t))
-    A=(eigenvectors.T)@X_0
+    # conversao X(t)->Y(t): Y(t)=Q.T*X(t) para facilitar a resolucao do sistema (x(t) dependendo de apenas uma variavel), obtendo Y_0 (array que contem os coeficientes 'a')
+    Y_0=eigenvectors@X_0
 
     # valores de tempo
-    t = np.arange(0 , 60, 0.01)
+    t = np.arange(0 , 10, 0.025)
 
-    # matriz que conterá as posicoes (coluna: tempo, linha: mola)
+    # matriz que contera as posicoes (coluna: tempo, linha: massa)
     Y_t=np.zeros([len(X_0),len(t)])
 
-    #preenchendo a matriz X_t de acordo com a solucao geral (velocidade inicial = 0 -> coeficiente 'b' = 0)
+    #preenchendo a matriz Y_t de acordo com a solucao geral (velocidade inicial = 0 -> coeficiente 'b' = 0)
     for (i,j) , x in np.ndenumerate(Y_t):
-        Y_t[i,j]=A[i]*np.cos(frequencies[i]*t[j])
+        Y_t[i,j]=Y_0[i]*np.cos(frequencies[i]*t[j])
 
     #coversao Y(t)->X(t): X(t)=Q*Y(t)
-    X_t=eigenvectors@Y_t
+    X_t=(eigenvectors.T)@Y_t
 
     #criando grafico
     fig, ax = plt.subplots()
@@ -133,7 +131,7 @@ def get_plot(case, X_0, frequencies, eigenvectors, mass=0):
 
     #se o parametro mass for passado apenas o deslocamento da massa escolhida aparecera no grafico
     if mass:
-        ax.plot(t, X_t[mass-1])
+        ax.plot(t, X_t[mass-1], color=c(i))
         plt.title('Deslocamento das Massa ' + str(mass))
     else:
         for i in range(len(X_0)):
