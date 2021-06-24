@@ -36,7 +36,6 @@ def item_b_c(item  ):
 
     #adicionando modo 3 a X_0 (modo de vibracao referente a maior frequencia)
     X_0['case3']=eigenvectors[np.argmax(frequencies)]
-    print(X_0)
 
     #mostrando grafico de deslocamento das molas
     get_plot(case, X_0, frequencies, eigenvectors, mass)
