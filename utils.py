@@ -4,38 +4,10 @@ import matplotlib.pyplot as plt
 #criterio de parada de iteracoes
 err=10**(-6)
 
-# definindo deslocamentos iniciais (itens b e c)
-X_0 = {
-    'case1': [-2,-3,-1,-3,-1],
-    'case2': [1,10,-4,3,-2],
-}
-
 #print colored items in array (0 for pink, 1 for green)
 def show(items):
     for index,value in enumerate(items):
         print("%s: %s\n" %(index+1,np.round_(value, 3)))
-
-#obtendo valores do seno e cosseno para a rotacao de givens
-def get_givens_params(A, k):
-    alfa = A[k,k]
-    beta = A[k+1,k]
-    if abs(alfa)>abs(beta):
-        t = -beta/alfa 
-        c = 1/((1+t**2)**(1/2))
-        s=c*t
-    else:
-        t = -alfa/beta
-        s = 1/((1+t**2)**(1/2))
-        c=s*t
-    return (c, s)
-
-#obtendo cada transformacao de givens
-def get_q(c, s, k, m):
-    q=np.identity(m)
-    q[k,k]=q[k+1,k+1]=c
-    q[k,k+1]=-s
-    q[k+1,k]=s
-    return q 
 
 # obtendo decomposicao QR
 def get_qr_decomposition(A):
@@ -43,12 +15,37 @@ def get_qr_decomposition(A):
     R=A.copy()
     m=np.size(A,0)
     Q = np.identity(m)
+
+    #funcao para obtencao dos valores do seno e cosseno para a rotacao de givens
+    def get_givens_params():
+        alfa = R[k,k]
+        beta = R[k+1,k]
+        if abs(alfa)>abs(beta):
+            t = -beta/alfa 
+            c = 1/((1+t**2)**(1/2))
+            s=c*t
+        else:
+            t = -alfa/beta
+            s = 1/((1+t**2)**(1/2))
+            c=s*t
+        return (c, s)
+
+    #funcao para obtencao de cada transformacao de givens
+    def get_q():
+        q=np.identity(m)
+        q[k,k]=q[k+1,k+1]=c
+        q[k,k+1]=-s
+        q[k+1,k]=s
+        return q 
+
+    #loop para decomposicao qr
     while k<=m-2:
-        c,s = get_givens_params(R,k)
-        q=get_q(c,s,k,m)
+        c,s = get_givens_params()
+        q=get_q()
         Q = Q@(q.T)
         R=q@R
         k+=1
+
     return (Q, R) 
 
 #obtendo auto-valores e auto-vetores com ou sem (hasShift) deslocamento espectral
@@ -58,21 +55,28 @@ def qr_shifted(A, hasShift, err=err):
     A_=A.copy()
     u=0
     k=0
+
+    #funcao para obtencao do deslocamento
+    def get_Shift():
+        u=0
+        I=np.identity(m)
+        if k>0 and hasShift:
+            d = (A_[m-2,m-2]-A_[m-1,m-1])/2
+            sgn = np.sign(d or 1)
+            u=A_[m-1,m-1]+d-sgn*(d**2+A_[m-1,m-2]**2)**(1/2)
+        return u*I
     
     #iteracao para cada auto-valor
     while m>=2:
-        #iterando decomposicoes QR
+        #iterando decomposicoes QR para 'zerar' beta
         while abs(A_[m-1,m-2])>err:
-            #definindo deslocamento espectral
-            if k>0 and hasShift:
-                d = (A_[m-2,m-2]-A_[m-1,m-1])/2
-                sgn = np.sign(d or 1)
-                u=A_[m-1,m-1]+d-sgn*(d**2+A_[m-1,m-2]**2)**(1/2)
 
-            uI=u*np.identity(m)
-            A_[0:m,0:m]-=uI
+            #definindo deslocamento espectral
+            shift = get_Shift()
+
+            A_[0:m,0:m]-=shift
             Q,R = get_qr_decomposition(A_[0:m,0:m])
-            A_[0:m,0:m]=R@Q+uI
+            A_[0:m,0:m]=R@Q+shift
             V[:,0:m]=V[:,0:m]@Q
             k+=1
         m-=1
@@ -101,40 +105,41 @@ def get_A(n , m, item):
             A[i,i-1]=-get_k(i+1, item)
     return A/m
 
-# obtendo graficos
-def get_plot(case, X_0, frequencies, eigenvectors, mass=0):
+#alterando base para simplificar solucao (posicao dependendo de apenas uma variavel)
+def get_Y_0(case, X_0, eigenvectors):
 
     #selecionando caso desejado do dicionario X_0
     X_0=X_0['case'+str(case)].copy()
 
-    # conversao X(t)->Y(t): Y(t)=Q.T*X(t) para facilitar a resolucao do sistema (x(t) dependendo de apenas uma variavel), obtendo Y_0 (array que contem os coeficientes 'a')
+    # conversao X(t)->Y(t): Y(t)=Q.T*X(t), obtendo Y_0 (array que contem os coeficientes 'a')
     Y_0=eigenvectors@X_0
 
-    # valores de tempo
-    t = np.arange(0 , 10, 0.025)
+    return Y_0
 
-    # matriz que contera as posicoes (coluna: tempo, linha: massa)
-    Y_t=np.zeros([len(X_0),len(t)])
+def get_Y_t(A, frequencies, t):
+    Y_t=np.zeros([len(A), len(t)])
 
     #preenchendo a matriz Y_t de acordo com a solucao geral (velocidade inicial = 0 -> coeficiente 'b' = 0)
-    for (i,j) , x in np.ndenumerate(Y_t):
-        Y_t[i,j]=Y_0[i]*np.cos(frequencies[i]*t[j])
+    for (i,j),y in np.ndenumerate(Y_t):
+        Y_t[i,j]=A[i]*np.cos(frequencies[i]*t[j])
+    
+    return Y_t
 
-    #coversao Y(t)->X(t): X(t)=Q*Y(t)
-    X_t=(eigenvectors.T)@Y_t
+# obtendo graficos
+def get_plot(X_t, t, mass=0):
 
     #criando grafico
     fig, ax = plt.subplots()
 
     #gerando escala de cores para o grafico
-    c = plt.cm.get_cmap('hsv', len(X_0)+1)
+    c = plt.cm.get_cmap('hsv', np.size(X_t,0)+1)
 
     #se o parametro mass for passado apenas o deslocamento da massa escolhida aparecera no grafico
     if mass:
-        ax.plot(t, X_t[mass-1], color=c(i))
-        plt.title('Deslocamento das Massa ' + str(mass))
+        ax.plot(t, X_t[mass-1], color=c(mass-1))
+        plt.title('Deslocamento da Massa ' + str(mass))
     else:
-        for i in range(len(X_0)):
+        for i in range(np.size(X_t,0)):
             label='Massa '+str(i+1)
             ax.plot(t,X_t[i], color=c(i), label=label)
             ax.legend()
