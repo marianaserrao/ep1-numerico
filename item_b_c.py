@@ -1,12 +1,12 @@
 import numpy as np
 from utils import *
 
-#item = True for b) and False for c)
-def item_b_c(item  ):
+#item = 0 para b) e 1 para c)
+def item_b_c(item):
     # definindo valores do item
     case=int(input("Qual dos casos do enunciado será testado (1, 2 ou 3, respectivamente)?\n"))
     m=2
-    n = 5 if item else 10
+    n = 10 if item else 5
 
     #definindo deslocamentos iniciais
     X_0 = {
@@ -18,7 +18,7 @@ def item_b_c(item  ):
     hasShift = True
 
     #definindo auto-valores e auto-vetores pelo metodo qr com deslocamento
-    eigenvalues,eigenvectors = qr_shifted(get_A(n,m, 0), hasShift)[0:2]
+    eigenvalues,eigenvectors = qr_shifted(get_A(n,m, item), hasShift)[0:2]
 
     #invertendo auto-vetores e auto-valores para serem compatíveis com a ordem das massas 
     #o método QR implementado retorna valores com ordem invertida
@@ -36,7 +36,7 @@ def item_b_c(item  ):
     show(eigenvectors)
 
     # definindo deslocamentos iniciais para item c
-    if not item:
+    if item:
         for i,key in enumerate(X_0):
             case_deslocs=X_0[key]
             for j in range(len(case_deslocs)):

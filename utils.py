@@ -150,6 +150,7 @@ def get_plot(X_t, t, comparative=0):
     if comparative:
         for i in range(masses_amount):
                 plot_line(axs)
+        plt.ylabel('Deslocamento (m)')
     else:
         for i, ax in enumerate(axs):
             plot_line(ax)
