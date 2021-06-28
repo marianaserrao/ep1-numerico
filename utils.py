@@ -126,26 +126,35 @@ def get_Y_t(A, frequencies, t):
     return Y_t
 
 # obtendo graficos
-def get_plot(X_t, t, mass=0):
+def get_plot(X_t, t, comparative=0):
 
-    #criando grafico
-    fig, ax = plt.subplots()
+    masses_amount = np.size(X_t,0)
+
+    #definindo numero de graficos na imagem
+    sub = 1 if comparative else masses_amount
+
+    #criando o grafico
+    fig, axs = plt.subplots(sub, sharey=True, sharex=True)
 
     #gerando escala de cores para o grafico
-    c = plt.cm.get_cmap('hsv', np.size(X_t,0)+1)
+    c = plt.cm.get_cmap('hsv', masses_amount+1)
 
-    #se o parametro mass for passado apenas o deslocamento da massa escolhida aparecera no grafico
-    if mass:
-        ax.plot(t, X_t[mass-1], color=c(mass-1))
-        plt.title('Deslocamento da Massa ' + str(mass))
+    #funcao para plotagem de cada massa
+    def plot_line(ax):
+        label='Massa '+str(i+1)
+        ax.plot(t,X_t[i], color=c(i), label=label)
+        ax.grid(True)
+        ax.legend()
+
+    #criando grafico
+    if comparative:
+        for i in range(masses_amount):
+                plot_line(axs)
     else:
-        for i in range(np.size(X_t,0)):
-            label='Massa '+str(i+1)
-            ax.plot(t,X_t[i], color=c(i), label=label)
-            ax.legend()
-            plt.title('Deslocamento das Massas')
+        for i, ax in enumerate(axs):
+            plot_line(ax)
+            
 
+    fig.suptitle('Deslocamento das Massas (m) por Tempo (s)', fontsize='xx-large')
     plt.xlabel('Tempo (s)')
-    plt.ylabel('Deslocamento (m)')
-    plt.grid(True)
     plt.show()

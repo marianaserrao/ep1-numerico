@@ -38,4 +38,5 @@ Cada item apresenta os outputs abaixo:
 - itens b e c:
 
     - Frequências e modos de vibração de cada massa
-    - Gráfico do deslocamento das massas ou de uma massa específica
+    - Gráficos dos deslocamentos de cada massa
+    - Gráfico comparativo dos deslocamentos das massas

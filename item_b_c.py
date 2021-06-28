@@ -5,7 +5,6 @@ from utils import *
 def item_b_c(item  ):
     # definindo valores do item
     case=int(input("Qual dos casos do enunciado será testado (1, 2 ou 3, respectivamente)?\n"))
-    mass=int(input("Para análisar gráficamente o comportamento de uma massa específica digite seu número, para analisar todas em conjunto digite 0:\n"))
     m=2
     n = 5 if item else 10
 
@@ -58,5 +57,6 @@ def item_b_c(item  ):
     #voltando a base inicial
     X_t=(eigenvectors.T)@Y_t
 
-    #mostrando grafico de deslocamento das molas
-    get_plot(X_t, t, mass)
+    #mostrando grafico de deslocamento das massas
+    get_plot(X_t, t)
+    get_plot(X_t, t, comparative=True)
