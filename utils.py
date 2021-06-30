@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 #criterio de parada de iteracoes
 err=10**(-6)
 
-#print colored items in array (0 for pink, 1 for green)
+#funcao para impressao de listas de forma organizada
 def show(items):
     for index,value in enumerate(items):
         print("%s: %s\n" %(index+1,np.round_(value, 3)))
 
-# obtendo decomposicao QR
+#funcao para decomposicao QR
 def get_qr_decomposition(A):
     k=0
     R=A.copy()
@@ -38,7 +38,7 @@ def get_qr_decomposition(A):
         q[k+1,k]=s
         return q 
 
-    #loop para decomposicao qr
+    #iteracao para decomposicao qr
     while k<=m-2:
         c,s = get_givens_params()
         q=get_q()
@@ -48,7 +48,7 @@ def get_qr_decomposition(A):
 
     return (Q, R) 
 
-#obtendo auto-valores e auto-vetores com ou sem (hasShift) deslocamento espectral
+#funcao para obtencao auto-valores e auto-vetores com ou sem (hasShift) deslocamento espectral
 def qr_shifted(A, hasShift, err=err):
     m = n = np.size(A,0)
     V=np.identity(n)
@@ -68,12 +68,14 @@ def qr_shifted(A, hasShift, err=err):
     
     #iteracao para cada auto-valor
     while m>=2:
+
         #iterando decomposicoes QR para 'zerar' beta
         while abs(A_[m-1,m-2])>err:
 
             #definindo deslocamento espectral
             shift = get_Shift()
 
+            #realizando deslocamento, decomposicao qr e redefinicoes de A_ e V
             A_[0:m,0:m]-=shift
             Q,R = get_qr_decomposition(A_[0:m,0:m])
             A_[0:m,0:m]=R@Q+shift
@@ -89,12 +91,12 @@ def qr_shifted(A, hasShift, err=err):
 
 # ITENS B E C
 
-# obtendo valores para matriz A
+# funcao para obtencao dos valores de k para matriz A
 def get_k(i, item):
     k = 40+2*i if item ==0 else 40+2*(-1)**i
     return k
 
-# obtendo matriz A (0 para item b e 1 para item c)
+# funcao para obtencao da matriz A (0 para item b e 1 para item c)
 def get_A(n , m, item):
     A=np.zeros([n,n])
     for i in range(n):
@@ -105,17 +107,18 @@ def get_A(n , m, item):
             A[i,i-1]=-get_k(i+1, item)
     return A/m
 
-#alterando base para simplificar solucao (posicao dependendo de apenas uma variavel)
+#funcao para alteracao da base, simplificando a solucao (posicao dependendo de apenas uma variavel)
 def get_Y_0(case, X_0, eigenvectors):
 
     #selecionando caso desejado do dicionario X_0
     X_0=X_0['case'+str(case)].copy()
 
-    # conversao X(t)->Y(t): Y(t)=Q.T*X(t), obtendo Y_0 (array que contem os coeficientes 'a')
+    # conversao X(t)->Y(t): Y(t)=Q.T*X(t), obtendo Y_0 (lista que contem os coeficientes 'a')
     Y_0=eigenvectors@X_0
 
     return Y_0
 
+# funcao para obtencao da matriz de posicoes y(t)
 def get_Y_t(A, frequencies, t):
     Y_t=np.zeros([len(A), len(t)])
 
@@ -125,7 +128,7 @@ def get_Y_t(A, frequencies, t):
     
     return Y_t
 
-# obtendo graficos
+# funcao para obtencao de graficos
 def get_plot(X_t, t, comparative=0):
 
     masses_amount = np.size(X_t,0)
